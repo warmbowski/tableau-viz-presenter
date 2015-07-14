@@ -1,0 +1,38 @@
+/* CSS declarations go here */
+ul {
+  list-style-type: none;
+}
+
+ul li {
+  display: inline-block;
+  text-align: center;
+  background-color: lightblue;
+  border-radius: 5px;
+  height: 15px;
+  margin: 3px;
+  padding: 5px;
+  cursor: pointer;
+}
+
+ul#fuel-type li.ulsd {
+  background-color: rgb(140, 86, 75);
+  width: 55px;
+}
+
+ul#fuel-type li.b99 {
+  background-color: rgb(44, 160, 44);
+  width: 55px;
+}
+
+p.warn {
+  display: inline;
+  text-align: center;
+  background-color: yellow;
+  border-radius: 5px;
+  width: 50px;
+  padding: 5px;
+}
+
+p.hide {
+  visibility: hidden;
+}

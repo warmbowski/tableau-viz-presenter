@@ -1,0 +1,23 @@
+<head>
+  <title>Tableau Viz Presentation</title>
+</head>
+
+<body>
+  <h1>2005 Passat TDI Mileage</h1>
+  <h2>The first 100,000 miles of data.</h2>
+  {{> viz}}
+</body>
+
+<template name="viz">
+  <p id="message" class="{{message.type}}">{{message.text}}&nbsp;</p>
+  <ul class="views">
+    <li id="all-tanks">All My Tanks</li>
+    <li id="compare-to-estimates">Compared to Estimates</li>
+    <li id="typical-speeds">What Speeds do I Typically Drive?</li>
+  </ul>
+  <ul id="fuel-type" class="filter-options">
+      <li class="ulsd">ULSD</li>
+      <li class="b99">B99</li>
+  </ul>
+  <div id="tableauViz"></div>
+</template>
