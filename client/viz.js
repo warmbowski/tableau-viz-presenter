@@ -50,6 +50,32 @@ Template.viz.onRendered(function() {
 
   viz = new tableau.Viz(placeholderDiv, url, options);
 
+  viz.addEventListener(
+    tableau.TableauEventName.MARKS_SELECTION,
+    function(marksEvent) {
+      return marksEvent.getMarksAsync().then(
+        function(marks) {
+          //console.log('initial: ', marks.length);
+          if(marks.length === 1) {
+            //console.log('final: ', marks.length);
+            var pairs = marks[0].getPairs();
+
+            var query = {
+              _id: Session.get('vizId')
+            };
+            var action = {
+              $set:{
+                filterName: pairs[1].fieldName,
+                filter: pairs[1].value
+              }
+            };
+            VizStateTracker.update(query, action);
+          }
+        }
+      );
+    }
+  );
+
   self.autorun(function() {
     var query = VizStateTracker.find();
     var handle = query.observe({
@@ -62,14 +88,21 @@ Template.viz.onRendered(function() {
               workbook.activateSheetAsync(doc.activeSheet).then(
                 function(newSheet) {
                   activeSheet = newSheet;
-                  if (doc.filter === null) {
-                    activeSheet.clearSelectedMarksAsync();
-                  } else {
+                  var filterValueType = typeof doc.filter;
+                  if (filterValueType === 'string') {
                     activeSheet.selectMarksAsync(
                       doc.filterName,
                       doc.filter,
                       tableau.FilterUpdateType.REPLACE
                     );
+                  } else  if (filterValueType === 'number') {
+                    activeSheet.selectMarksAsync(
+                      doc.filterName,
+                      {min: doc.filter, max: doc.filter},
+                      tableau.FilterUpdateType.REPLACE
+                    );
+                  } else {
+                    activeSheet.clearSelectedMarksAsync();
                   }
                   Session.set('message', 'Resync Complete');
                   Meteor.setTimeout(function() {
@@ -89,14 +122,21 @@ Template.viz.onRendered(function() {
             workbook.activateSheetAsync(doc.activeSheet).then(
               function(newSheet) {
                 activeSheet = newSheet;
-                if (doc.filter === null) {
-                  activeSheet.clearSelectedMarksAsync();
-                } else {
+                var filterValueType = typeof doc.filter;
+                if (filterValueType === 'string') {
                   activeSheet.selectMarksAsync(
                     doc.filterName,
                     doc.filter,
                     tableau.FilterUpdateType.REPLACE
                   );
+                } else  if (filterValueType === 'number') {
+                  activeSheet.selectMarksAsync(
+                    doc.filterName,
+                    {min: doc.filter, max: doc.filter},
+                    tableau.FilterUpdateType.REPLACE
+                  );
+                } else {
+                  activeSheet.clearSelectedMarksAsync();
                 }
                 Session.set('message', 'Resync Complete');
                 Meteor.setTimeout(function() {
@@ -125,14 +165,21 @@ Template.viz.onRendered(function() {
           );
         }
         if (newDoc.filter !== oldDoc.filter) {
-          if (newDoc.filter === null) {
-            activeSheet.clearSelectedMarksAsync();
-          } else {
+          var filterValueType = typeof newDoc.filter;
+          if (filterValueType === 'string') {
             activeSheet.selectMarksAsync(
               newDoc.filterName,
               newDoc.filter,
               tableau.FilterUpdateType.REPLACE
             );
+          } else if (filterValueType === 'number') {
+            activeSheet.selectMarksAsync(
+              newDoc.filterName,
+              {min: newDoc.filter, max: newDoc.filter},
+              tableau.FilterUpdateType.REPLACE
+            );
+          } else {
+            activeSheet.clearSelectedMarksAsync();
           }
         }
       }
@@ -167,7 +214,7 @@ Template.viz.events({
           filter: null
         }
       };
-    var up = VizStateTracker.update(query, action);
+    VizStateTracker.update(query, action);
   },
 
   'click li#compare-to-estimates': function() {
@@ -180,7 +227,7 @@ Template.viz.events({
           filter: null
         }
       };
-    var up = VizStateTracker.update(query, action);
+    VizStateTracker.update(query, action);
   },
 
   'click li#typical-speeds': function() {
@@ -193,7 +240,7 @@ Template.viz.events({
           filter: null
         }
       };
-    var up = VizStateTracker.update(query, action);
+    VizStateTracker.update(query, action);
   },
 
   'click ul#fuel-type li': function(evt) {
@@ -207,7 +254,7 @@ Template.viz.events({
         filter: filter
       }
     };
-    var up = VizStateTracker.update(query, action);
+    VizStateTracker.update(query, action);
   }
 
 });
